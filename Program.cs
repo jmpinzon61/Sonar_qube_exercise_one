@@ -178,7 +178,7 @@ namespace BadCalcVeryBad
                             // Antes: res = calc.DoIt(a, b, op); en ambos casos.
                             // Ahora: Creamos un nuevo objeto temporal para la división por cero.
                             var temp = new ShoddyCalc();
-                            res = temp.DoIt(a, (TryParse(b) + 0.0000001).ToString(), "/");
+                            res = ShoddyCalc.DoIt(a, b, op);
                         }
                         else
                         {
@@ -186,9 +186,9 @@ namespace BadCalcVeryBad
                             // Antes: res = calc.DoIt(a, b, op); en ambos casos.
                             // Ahora: Simulamos una diferencia, por ejemplo, sumando un valor basado en el contador.
                             if (U.Counter % 2 == 0)
-                                res = calc.DoIt(a, b, op);
+                                res = ShoddyCalc.DoIt(a, (TryParse(b) + 0.0000001).ToString(), "/");
                             else
-                                res = calc.DoIt(a, b, op) + (U.Counter * 0.0000000001); // Pequeña diferencia
+                                res = ShoddyCalc.DoIt(a, b, op) + (U.Counter * 0.0000000001); // Pequeña diferencia
                         }
                     }
                 }
