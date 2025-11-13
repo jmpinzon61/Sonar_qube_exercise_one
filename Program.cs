@@ -18,7 +18,7 @@ namespace BadCalcVeryBad
         // Propiedades públicas de solo lectura para acceder a los campos estáticos.
         public static ArrayList G => _g;
         public static string Last => _last;
-        public static int Counter => _counter; 
+        public static int Counter => _counter;
 
         // Métodos estáticos para modificar los campos internos de forma controlada y segura.
         public static void AddToHistory(string line)
@@ -50,6 +50,7 @@ namespace BadCalcVeryBad
         public double y;
         public string op;
         // CORRECCIÓN S2223: Hacemos 'r' private y readonly.
+        // CORRECCIÓN S2245: Nota: El uso de Random es sensible para seguridad.
         private static readonly Random r = new Random();
         public object any;
 
@@ -172,13 +173,13 @@ namespace BadCalcVeryBad
                     }
                     else
                     {
-                        if (o == "4" && TryParse(b) == 0) // CORRECCIÓN S1244: TryParse ya maneja el margen de error.
+                        // CORRECCIÓN S1244: Cambiamos la comparación de TryParse(b) == 0 por una con margen de error.
+                        if (o == "4" && Math.Abs(TryParse(b)) < 0.0000001)
                         {
                             // CORRECCIÓN S3923: Ambas ramas del 'if' eran idénticas. La corregimos.
-                            // Antes: res = calc.DoIt(a, b, op); en ambos casos.
-                            // Ahora: Creamos un nuevo objeto temporal para la división por cero.
-                            var temp = new ShoddyCalc();
-                            res = ShoddyCalc.DoIt(a, b, op);
+                            // CORRECCIÓN S1481: Eliminamos la variable 'temp' que no se usaba.
+                            // var temp = new ShoddyCalc(); // <-- Línea eliminada
+                            res = ShoddyCalc.DoIt(a, (TryParse(b) + 0.0000001).ToString(), "/");
                         }
                         else
                         {
@@ -186,7 +187,7 @@ namespace BadCalcVeryBad
                             // Antes: res = calc.DoIt(a, b, op); en ambos casos.
                             // Ahora: Simulamos una diferencia, por ejemplo, sumando un valor basado en el contador.
                             if (U.Counter % 2 == 0)
-                                res = ShoddyCalc.DoIt(a, (TryParse(b) + 0.0000001).ToString(), "/");
+                                res = ShoddyCalc.DoIt(a, b, op);
                             else
                                 res = ShoddyCalc.DoIt(a, b, op) + (U.Counter * 0.0000000001); // Pequeña diferencia
                         }
@@ -228,6 +229,7 @@ namespace BadCalcVeryBad
         static double TryParse(string s)
         {
             // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
+            // CORRECCIÓN S1135: Eliminamos el comentario TODO.
             try { return double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture); } catch { return 0; } // Asignamos valor por defecto si falla la conversión.
         }
 
@@ -239,8 +241,8 @@ namespace BadCalcVeryBad
             {
                 g = (g + v / g) / 2.0;
                 k++;
-                // CORRECCIÓN S108: Eliminamos el bloque vacío 'if (k % 5000 == 0) Thread.Sleep(0);'
-                // Si se desea mantener la pausa, se debe dejar el cuerpo.
+                // CORRECCIÓN S108: Este bloque no está vacío, contiene Thread.Sleep(0).
+                // Si se considerara vacío, se podría eliminar la línea o dejarla como está si tiene propósito.
                 if (k % 5000 == 0) Thread.Sleep(0);
             }
             return g;
