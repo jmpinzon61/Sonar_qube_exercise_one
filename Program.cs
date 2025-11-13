@@ -52,9 +52,16 @@ namespace BadCalcVeryBad
         // CORRECCIÓN S2223: Hacemos 'r' private y readonly.
         // CORRECCIÓN S2245: Nota: El uso de Random es sensible para seguridad.
         private static readonly Random r = new Random();
-        public object any;
 
-        public ShoddyCalc() { x = 0; y = 0; op = ""; any = null; }
+        // CORRECCIÓN S1104: Hacemos 'any' private y añadimos una propiedad pública.
+        private object _any;
+        public object Any
+        {
+            get { return _any; }
+            set { _any = value; }
+        }
+
+        public ShoddyCalc() { x = 0; y = 0; op = ""; _any = null; } // Actualizamos el constructor.
 
         // CORRECCIÓN S2325: Hacemos 'DoIt' static porque no usa campos de instancia (excepto 'r', que ahora es static).
         public static double DoIt(string a, string b, string o)
@@ -96,9 +103,10 @@ namespace BadCalcVeryBad
                 object obj2 = B;
                 if (r.Next(0, 100) == 42) return (double)obj + (double)obj2;
             }
-            // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            // El resultado de r.Next(0, 100) es un número entre 0 y 99. Si es 42, se hace una operación adicional.
-            // Si ocurre una excepción (muy improbable aquí con doubles ya parseados), se ignora y se devuelve 0.
+            // CORRECCIÓN S2486 y S108: Añadimos comentario explicativo para ignorar la excepción.
+            // La operación r.Next(0, 100) == 42 es una condición aleatoria rara.
+            // Si se produce una excepción inesperada aquí (muy improbable con los tipos usados), 
+            // se ignora y se devuelve 0, lo cual es un comportamiento definido.
             catch { }
             return 0;
         }
@@ -204,9 +212,8 @@ namespace BadCalcVeryBad
                 var line = a + "|" + b + "|" + op + "|" + res.ToString("0.###############", CultureInfo.InvariantCulture);
                 // Usamos el método público para agregar al historial.
                 U.AddToHistory(line);
-                // CORRECCIÓN: Ahora usamos la propiedad pública 'Misc' en lugar del campo público 'misc'.
-                // Como 'misc' ya no existe, lo simulamos como un campo de instancia en 'calc'.
-                calc.any = line; // Usamos el campo 'any' como contenedor temporal si es necesario.
+                // CORRECCIÓN: Ahora usamos la propiedad pública 'Any' en lugar del campo público 'any'.
+                calc.Any = line; // Usamos la propiedad 'Any' como contenedor temporal si es necesario.
                 File.AppendAllText("history.txt", line + Environment.NewLine);
             }
             // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
