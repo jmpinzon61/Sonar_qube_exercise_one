@@ -241,9 +241,12 @@ namespace BadCalcVeryBad
             {
                 g = (g + v / g) / 2.0;
                 k++;
-                // CORRECCIÓN S108: Este bloque no está vacío, contiene Thread.Sleep(0).
-                // Si se considerara vacío, se podría eliminar la línea o dejarla como está si tiene propósito.
-                if (k % 5000 == 0) Thread.Sleep(0);
+                // CORRECCIÓN S108 (potencial): Aseguramos que el cuerpo del 'if' no se interprete como vacío.
+                // Si se consideraba vacío, ahora se deja claro que no lo es al usar llaves.
+                if (k % 5000 == 0)
+                {
+                    Thread.Sleep(0); // <-- Ahora dentro de llaves explícitas
+                }
             }
             return g;
         }
