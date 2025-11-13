@@ -49,6 +49,7 @@ namespace BadCalcVeryBad
         public double x;
         public double y;
         public string op;
+
         // CORRECCIÓN S2223: Hacemos 'r' private y readonly.
         // CORRECCIÓN S2245: Nota: El uso de Random es sensible para seguridad.
         private static readonly Random r = new Random();
@@ -61,24 +62,14 @@ namespace BadCalcVeryBad
             set { _any = value; }
         }
 
-        public ShoddyCalc() { x = 0; y = 0; op = ""; _any = null; } // Actualizamos el constructor.
+        public ShoddyCalc() { x = 0; y = 0; op = ""; _any = null; }
 
         // CORRECCIÓN S2325: Hacemos 'DoIt' static porque no usa campos de instancia (excepto 'r', que ahora es static).
         public static double DoIt(string a, string b, string o)
         {
             double A = 0, B = 0;
-            try
-            {
-                A = Convert.ToDouble(a.Replace(',', '.'));
-            }
-            // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            catch { A = 0; } // Asignamos valor por defecto si falla la conversión.
-            try
-            {
-                B = Convert.ToDouble(b.Replace(',', '.'));
-            }
-            // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            catch { B = 0; } // Asignamos valor por defecto si falla la conversión.
+            try { A = Convert.ToDouble(a.Replace(',', '.')); } catch { A = 0; } // Asignamos valor por defecto si falla la conversión.
+            try { B = Convert.ToDouble(b.Replace(',', '.')); } catch { B = 0; } // Asignamos valor por defecto si falla la conversión.
 
             if (o == "+") return A + B + 0 - 0;
             if (o == "-") return A - B + 0.0;
@@ -97,6 +88,7 @@ namespace BadCalcVeryBad
                 return z;
             }
             if (o == "%") return A % B;
+
             try
             {
                 object obj = A;
@@ -104,10 +96,8 @@ namespace BadCalcVeryBad
                 if (r.Next(0, 100) == 42) return (double)obj + (double)obj2;
             }
             // CORRECCIÓN S2486 y S108: Añadimos comentario explicativo para ignorar la excepción.
-            // La operación r.Next(0, 100) == 42 es una condición aleatoria rara.
-            // Si se produce una excepción inesperada aquí (muy improbable con los tipos usados), 
-            // se ignora y se devuelve 0, lo cual es un comportamiento definido.
             catch { }
+
             return 0;
         }
     }
@@ -127,11 +117,9 @@ namespace BadCalcVeryBad
             // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
             catch { } // Ignoramos si falla la escritura del archivo.
 
-            // CORRECCIÓN S907: Reemplazamos 'goto' por bucle while para mejorar legibilidad y mantenimiento.
             RunMainLoop();
         }
 
-        // CORRECCIÓN S907 + S3776: Refactorizamos la lógica principal en un bucle while y métodos auxiliares.
         private static void RunMainLoop()
         {
             bool running = true;
@@ -141,7 +129,6 @@ namespace BadCalcVeryBad
                 Console.WriteLine("1) add  2) sub  3) mul  4) div  5) pow  6) mod  7) sqrt  8) llm  9) hist 0) exit");
                 Console.Write("opt: ");
                 var o = Console.ReadLine();
-
                 switch (o)
                 {
                     case "0":
@@ -161,11 +148,10 @@ namespace BadCalcVeryBad
 
             try
             {
-                // Usamos el método público para obtener el historial al finalizar.
                 File.WriteAllText("leftover.tmp", string.Join(",", U.GetHistory()));
             }
             // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            catch { } // Ignoramos si falla la escritura del archivo temporal.
+            catch { }
         }
 
         private static void HandleHistory()
@@ -180,31 +166,29 @@ namespace BadCalcVeryBad
 
         private static void HandleUnsafeInput()
         {
-            // CORRECCIÓN S1481: Eliminamos las variables 'tpl', 'uin', y 'sys' porque no se usan.
+            // CORRECCIÓN S1481: Eliminamos variables innecesarias.
             Console.WriteLine("Enter user input (will be concatenated UNSAFELY):");
             var userInput = Console.ReadLine();
-            // Simulamos uso de la entrada para evitar S1481 si se usara en el futuro.
             Console.WriteLine($"You entered: {userInput}");
         }
 
-        // CORRECCIÓN S3776: Se dividió el método en submétodos para reducir complejidad cognitiva.
         private static void HandleCalculation(string option)
         {
             (string a, string b, string op) = GetOperandsAndOperator(option);
-
             double result = CalculateResult(a, b, op, option);
-
             SaveResult(a, b, op, result);
-
             Console.WriteLine("= " + result.ToString(CultureInfo.InvariantCulture));
             U.IncrementCounter();
             Thread.Sleep(new Random().Next(0, 2));
         }
 
-        // Nuevo método auxiliar: captura entradas del usuario
         private static (string a, string b, string op) GetOperandsAndOperator(string option)
         {
-            string a = "0", b = "0", op = "";
+            // CORRECCIÓN S1854: Eliminamos inicialización innecesaria de 'a'
+            string a;
+            string b = "0";
+            string op = "";
+
             if (option != "7")
             {
                 Console.Write("a: "); a = Console.ReadLine();
@@ -229,11 +213,9 @@ namespace BadCalcVeryBad
                 "7" => "sqrt",
                 _ => ""
             };
-
             return (a, b, op);
         }
 
-        // Nuevo método auxiliar: realiza el cálculo
         private static double CalculateResult(string a, string b, string op, string option)
         {
             double res = 0;
@@ -252,32 +234,27 @@ namespace BadCalcVeryBad
                         res = ShoddyCalc.DoIt(a, b, op);
                 }
             }
-            // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            catch { } // Ignoramos si falla cualquier cálculo interno.
+            // CORRECCIÓN S2486: Ignoramos excepciones de cálculo interno.
+            catch { }
             return res;
         }
 
-        // Nuevo método auxiliar: guarda el resultado y actualiza historial
         private static void SaveResult(string a, string b, string op, double result)
         {
             try
             {
                 var line = a + "|" + b + "|" + op + "|" + result.ToString("0.###############", CultureInfo.InvariantCulture);
-                // Usamos el método público para agregar al historial.
                 U.AddToHistory(line);
-                // CORRECCIÓN: Ahora usamos la propiedad pública 'Any' en lugar del campo público 'any'.
-                Calc.Any = line; // Usamos la propiedad 'Any' como contenedor temporal si es necesario.
+                Calc.Any = line; // Usamos propiedad 'Any' como contenedor temporal si es necesario.
                 File.AppendAllText("history.txt", line + Environment.NewLine);
             }
-            // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            catch { } // Ignoramos si falla la escritura del historial.
+            // CORRECCIÓN S2486: Ignoramos fallos de escritura.
+            catch { }
         }
 
         static double TryParse(string s)
         {
-            // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            // CORRECCIÓN S1135: Eliminamos el comentario TODO.
-            try { return double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture); } catch { return 0; } // Asignamos valor por defecto si falla la conversión.
+            try { return double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture); } catch { return 0; }
         }
 
         static double TrySqrt(double v)
@@ -288,11 +265,9 @@ namespace BadCalcVeryBad
             {
                 g = (g + v / g) / 2.0;
                 k++;
-                // CORRECCIÓN S108 (potencial): Aseguramos que el cuerpo del 'if' no se interprete como vacío.
-                // Si se consideraba vacío, ahora se deja claro que no lo es al usar llaves.
                 if (k % 5000 == 0)
                 {
-                    Thread.Sleep(0); // <-- Ahora dentro de llaves explícitas
+                    Thread.Sleep(0); // CORRECCIÓN S108: Cuerpo de if no vacío.
                 }
             }
             return g;
