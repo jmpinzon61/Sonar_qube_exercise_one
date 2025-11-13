@@ -1,0 +1,22 @@
+@"
+## Ignorar archivos de Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Archivos de compilación
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+bld/
+
+## Archivos temporales
+*.tmp
+*.temp
+"@ | Out-File -FilePath .gitignore -Encoding UTF8
