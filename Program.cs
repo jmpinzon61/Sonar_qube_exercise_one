@@ -8,6 +8,7 @@ using System.Threading.Tasks; // Añadido para Interlocked
 namespace BadCalcVeryBad
 {
     // Clase estática porque solo tiene miembros estáticos
+    //  dejo con los ultimos cambios que hice todos en general estan en el docuemnto word
     public static class U
     {
         private static readonly ArrayList _g = new ArrayList();
