@@ -46,22 +46,26 @@ namespace BadCalcVeryBad
 
     public class ShoddyCalc
     {
-        public double x;
-        public double y;
-        public string op;
+        // CORRECCIÓN S1104: Hacemos 'x', 'y' y 'op' propiedades públicas autoimplementadas en lugar de campos públicos.
+        public double X { get; set; }
+        public double Y { get; set; }
+        public string Op { get; set; }
+
         // CORRECCIÓN S2223: Hacemos 'r' private y readonly.
         // CORRECCIÓN S2245: Nota: El uso de Random es sensible para seguridad.
         private static readonly Random r = new Random();
 
         // CORRECCIÓN S1104: Hacemos 'any' private y añadimos una propiedad pública.
-        private object _any;
-        public object Any
-        {
-            get { return _any; }
-            set { _any = value; }
-        }
+        // CORRECCIÓN S2292: Convertimos la propiedad en autoimplementada.
+        public object Any { get; set; }
 
-        public ShoddyCalc() { x = 0; y = 0; op = ""; _any = null; } // Actualizamos el constructor.
+        public ShoddyCalc()
+        {
+            X = 0;
+            Y = 0;
+            Op = "";
+            Any = null;
+        } // Actualizamos el constructor.
 
         // CORRECCIÓN S2325: Hacemos 'DoIt' static porque no usa campos de instancia (excepto 'r', que ahora es static).
         public static double DoIt(string a, string b, string o)
@@ -107,7 +111,10 @@ namespace BadCalcVeryBad
             // La operación r.Next(0, 100) == 42 es una condición aleatoria rara.
             // Si se produce una excepción inesperada aquí (muy improbable con los tipos usados), 
             // se ignora y se devuelve 0, lo cual es un comportamiento definido.
-            catch { }
+            catch
+            {
+                // Ignoramos cualquier excepción inesperada, retornamos 0 como valor por defecto.
+            }
             return 0;
         }
     }
@@ -239,7 +246,12 @@ namespace BadCalcVeryBad
         {
             // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
             // CORRECCIÓN S1135: Eliminamos el comentario TODO.
-            try { return double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture); } catch { return 0; } // Asignamos valor por defecto si falla la conversión.
+            try { return double.Parse(s.Replace(',', '.'), CultureInfo.InvariantCulture); }
+            catch
+            {
+                // Asignamos valor por defecto si falla la conversión.
+                return 0;
+            }
         }
 
         static double TrySqrt(double v)
