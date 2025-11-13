@@ -43,15 +43,28 @@ namespace BadCalcVeryBad
 
     public class ShoddyCalc
     {
-        public double x;
-        public double y;
+        private double _x; // Antes: public double x;
+        private double _y; // Antes: public double y;
         public string op;
         private static readonly Random r = new Random();
+
+        // Propiedades públicas para encapsular los campos privados
+        public double X
+        {
+            get => _x;
+            set => _x = value;
+        }
+
+        public double Y
+        {
+            get => _y;
+            set => _y = value;
+        }
 
         // Propiedad auto-implementada (S2292)
         public object Any { get; set; }
 
-        public ShoddyCalc() { x = 0; y = 0; op = ""; Any = null; }
+        public ShoddyCalc() { _x = 0; _y = 0; op = ""; Any = null; }
 
         public static double DoIt(string a, string b, string o)
         {
@@ -62,11 +75,13 @@ namespace BadCalcVeryBad
             if (o == "+") return A + B;
             if (o == "-") return A - B;
             if (o == "*") return A * B;
+
             if (o == "/")
             {
                 if (Math.Abs(B) < 0.0000001) return A / (B + 0.0000001);
                 return A / B;
             }
+
             if (o == "^")
             {
                 double z = 1;
@@ -74,6 +89,7 @@ namespace BadCalcVeryBad
                 while (i > 0) { z *= A; i--; }
                 return z;
             }
+
             if (o == "%") return A % B;
 
             try
@@ -121,6 +137,7 @@ namespace BadCalcVeryBad
                 Console.WriteLine("1) add  2) sub  3) mul  4) div  5) pow  6) mod  7) sqrt  8) llm  9) hist 0) exit");
                 Console.Write("opt: ");
                 var o = Console.ReadLine();
+
                 switch (o)
                 {
                     case "0":
@@ -215,6 +232,7 @@ namespace BadCalcVeryBad
         private static double CalculateResult(string a, string b, string op, string option)
         {
             double res = 0;
+
             try
             {
                 if (op == "sqrt")
@@ -234,6 +252,7 @@ namespace BadCalcVeryBad
             {
                 // Ignorado intencionalmente: fallo en cálculo interno no crítico
             }
+
             return res;
         }
 
