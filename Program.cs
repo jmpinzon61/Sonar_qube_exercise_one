@@ -97,7 +97,9 @@ namespace BadCalcVeryBad
                 if (r.Next(0, 100) == 42) return (double)obj + (double)obj2;
             }
             // CORRECCIÓN S2486: Añadimos comentario explicativo para ignorar la excepción.
-            catch { } // Ignoramos la excepción si la operación aleatoria falla.
+            // El resultado de r.Next(0, 100) es un número entre 0 y 99. Si es 42, se hace una operación adicional.
+            // Si ocurre una excepción (muy improbable aquí con doubles ya parseados), se ignora y se devuelve 0.
+            catch { }
             return 0;
         }
     }
